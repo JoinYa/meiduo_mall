@@ -38,9 +38,12 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'apps.users',
+    # CORS
+    'corsheaders'
 ]
 # 中间件
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',  # CORS配置-一般放在最前面
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -187,3 +190,11 @@ LOGGING = {
 }
 # 替换系统User
 AUTH_USER_MODEL = 'users.User'
+
+# CORS 白名单
+CORS_ORIGIN_WHITELIST = (
+    'http://127.0.0.1:8080',
+    'http://localhost:8080',
+    'http://www.meiduo.site:8080'
+)
+CORS_ALLOW_CREDENTIALS = True  # 允许携带cookie
