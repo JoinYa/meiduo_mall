@@ -36,6 +36,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'rest_framework_simplejwt',
     'rest_framework',
     'apps.users',
     # CORS
@@ -111,7 +112,7 @@ AUTH_PASSWORD_VALIDATORS = [
 # LANGUAGE_CODE = 'en-us'
 LANGUAGE_CODE = 'zh-Hans'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Asia/Shanghai'
 
 USE_I18N = True
 
@@ -188,7 +189,7 @@ LOGGING = {
         },
     }
 }
-# 替换系统User
+# 自定义用户模型
 AUTH_USER_MODEL = 'users.User'
 
 # CORS 白名单
@@ -198,3 +199,22 @@ CORS_ORIGIN_WHITELIST = (
     'http://www.meiduo.site:8080'
 )
 CORS_ALLOW_CREDENTIALS = True  # 允许携带cookie
+
+# drf 配置的key
+REST_FRAMEWORK = {
+    # 配置登录权限方式
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
+        'rest_framework.authentication.BasicAuthentication',
+
+    ],
+    # 默认的权限列表： 只有登录用户才可以访问
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticated',
+    ],
+    # 分页
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    'PAGE_SIZE': 10  # 每页数目
+}
+
