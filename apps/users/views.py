@@ -1,13 +1,15 @@
 from rest_framework import status
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework_simplejwt.exceptions import TokenError, InvalidToken
-
 from apps.users.models import User
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.views import APIView
-from .serializers import UserInfoSerializers
+from .serializers import UserSerializers
 from utils.pagenumberpagination import LargeResultsSetPagination
 from rest_framework_simplejwt.views import TokenObtainPairView
+from common.permissions import Userpermission
+from rest_framework.decorators import action
 
 
 # Create your views here.
@@ -15,9 +17,20 @@ class ModelViewSetBase(ModelViewSet):
     pagination_class = LargeResultsSetPagination
 
 
-class UserInfoViewSet(ModelViewSetBase):
+class UserViewSet(ModelViewSetBase):
     queryset = User.objects.all()
-    serializer_class = UserInfoSerializers
+    serializer_class = UserSerializers
+    permission_classes = [IsAuthenticated, Userpermission]
+
+    # @action(methods=['post'], detail=False, url_path='upload_avatar')
+    def upload_avatar(self, request, pk=None):
+        """上传用户头像"""
+        avatar = request.data.get("avatar")
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, data={"avatar": avatar}, partial=True)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response({"url": serializer.data["avatar"]})
 
 
 class RegisterViewSet(APIView):

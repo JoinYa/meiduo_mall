@@ -9,7 +9,7 @@ https://docs.djangoproject.com/en/4.2/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.2/ref/settings/
 """
-
+import datetime
 from pathlib import Path
 import os
 
@@ -217,4 +217,16 @@ REST_FRAMEWORK = {
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     'PAGE_SIZE': 10  # 每页数目
 }
-
+# 设置token有效期
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': datetime.timedelta(minutes=30),
+    'REFRESH_TOKEN_LIFETIME': datetime.timedelta(days=7),
+}
+# 使用自定义身份认证类进行身份认证
+AUTHENTICATION_BACKENDS = [
+    'common.authenticate.MyBackend',  # 自定义认证后端
+    'django.contrib.auth.backends.ModelBackend',  # 默认认证后端
+]
+# 指定文件上传的路径
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+MEDIA_URL = 'media/'
