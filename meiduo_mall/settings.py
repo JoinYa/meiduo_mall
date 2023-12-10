@@ -225,7 +225,6 @@ SIMPLE_JWT = {
 # 使用自定义身份认证类进行身份认证
 AUTHENTICATION_BACKENDS = [
     'common.authenticate.MyBackend',  # 自定义认证后端
-    'django.contrib.auth.backends.ModelBackend',  # 默认认证后端
 ]
 # 指定文件上传的路径
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')

@@ -12,7 +12,7 @@ class MyBackend(ModelBackend):
     自定义认证后端
     """
 
-    def authenticate(self, username=None, password=None, **kwargs):
+    def authenticate(self, request, username=None, password=None, **kwargs):
         """
         自定义认证
         :param username: 用户名
@@ -20,6 +20,8 @@ class MyBackend(ModelBackend):
         :param kwargs: 其他参数
         :return: 返回用户对象
         """
+        username = username if username else request.data.get("username")
+        password = password if password else request.data.get("password")
         try:
             user = User.objects.get(Q(username=username) | Q(mobile=username) | Q(email=username))
         except Exception as e:
