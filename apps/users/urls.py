@@ -19,5 +19,6 @@ from rest_framework.routers import DefaultRouter
 router = DefaultRouter()
 # 向路由器中注册视图集
 router.register(r'users', views.UserViewSet, basename='user')
+router.register(r'addrs', views.AddrViewSet, basename='addr')
 # 追加路由
 urlpatterns += router.urls

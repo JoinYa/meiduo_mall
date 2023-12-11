@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework_simplejwt',
     'rest_framework',
+    'django_filters',
     'apps.users',
     # CORS
     'corsheaders'
@@ -215,7 +216,9 @@ REST_FRAMEWORK = {
     ],
     # 分页
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
-    'PAGE_SIZE': 10  # 每页数目
+    'PAGE_SIZE': 10,  # 每页数目
+    # 指定过滤器
+    'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend'],
 }
 # 设置token有效期
 SIMPLE_JWT = {

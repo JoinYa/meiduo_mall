@@ -2,28 +2,44 @@ from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework_simplejwt.exceptions import TokenError, InvalidToken
-from apps.users.models import User
+from apps.users.models import User, Addr
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.views import APIView
-from .serializers import UserSerializers
+from .serializers import UserSerializers, AddrSerializers
 from utils.pagenumberpagination import LargeResultsSetPagination
 from rest_framework_simplejwt.views import TokenObtainPairView
-from common.permissions import Userpermission
+from common.permissions import BasePermission
 from rest_framework.decorators import action
 
 
 # Create your views here.
-class ModelViewSetBase(ModelViewSet):
+class BaseModelViewSet(ModelViewSet):
     pagination_class = LargeResultsSetPagination
+    permission_classes = [IsAuthenticated, BasePermission]
+
+    def update(self, request, *args, **kwargs):
+        kwargs["partial"] = request.data.get("partial", False)
+        return super().update(request, *args, **kwargs)
 
 
-class UserViewSet(ModelViewSetBase):
+class UserViewSet(BaseModelViewSet):
+    """用户视图"""
     queryset = User.objects.all()
     serializer_class = UserSerializers
-    permission_classes = [IsAuthenticated, Userpermission]
 
-    # @action(methods=['post'], detail=False, url_path='upload_avatar')
-    def upload_avatar(self, request, pk=None):
+    def list(self, request, *args, **kwargs):
+        queryset = self.filter_queryset(self.get_queryset())
+        if not request.user.is_superuser:
+            queryset = queryset.filter(username=request.user)
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
+
+    def upload_avatar(self, request):
         """上传用户头像"""
         avatar = request.data.get("avatar")
         instance = self.get_object()
@@ -76,3 +92,27 @@ class LoginViewSet(TokenObtainPairView):
         result["errmsg"] = "ok"
 
         return Response(result, status=status.HTTP_200_OK)
+
+
+class AddrViewSet(BaseModelViewSet):
+    """收获地址视图"""
+    queryset = Addr.objects.all()
+    serializer_class = AddrSerializers
+
+    def list(self, request, *args, **kwargs):
+        queryset = self.filter_queryset(self.get_queryset())
+        if not request.user.is_superuser:
+            queryset = queryset.filter(user=request.user)
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
+
+    def update(self, request, *args, **kwargs):
+        if request.data.get("partial", False) and self.queryset.filter(is_default=True).exists():
+            # 如果已存在默认地址，先取消其默认状态
+            self.queryset.filter(is_default=True).update(is_default=False)
+        return super(AddrViewSet, self).update(request, *args, **kwargs)

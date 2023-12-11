@@ -1,7 +1,9 @@
 from rest_framework import permissions
+from apps.users.models import User
 
 
-class Userpermission(permissions.BasePermission):
+# 自定义权限
+class BasePermission(permissions.BasePermission):
     """
     Custom permission to only allow owners of an object to edit it.
     """
@@ -12,4 +14,6 @@ class Userpermission(permissions.BasePermission):
         if request.user.is_superuser:
             return True
         # Write permissions are only allowed to the owner of the snippet.
-        return obj == request.user
+        if isinstance(obj, User):
+            return obj == request.user
+        return obj.user == request.user
