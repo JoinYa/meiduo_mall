@@ -10,7 +10,11 @@ urlpatterns = [
     # 校验token
     path('token/verify/', TokenVerifyView.as_view()),
     # 上传头像
-    path('users/<int:pk>/upload_avatar/', views.UserViewSet.as_view({"post": "upload_avatar"}))
+    path('users/<int:pk>/upload_avatar/', views.UserViewSet.as_view({"post": "upload_avatar"})),
+    # 发送短信验证码
+    path('verifcodes/send_verifcode/', views.SendVerifCodeViewSet.as_view()),
+    # 验证短信验证码
+    path('verifcodes/check_verifcode/', views.CheckSendVerifCodeViewSet.as_view())
 ]
 
 from rest_framework.routers import DefaultRouter

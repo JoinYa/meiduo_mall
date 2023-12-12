@@ -16,7 +16,7 @@ class User(AbstractUser, BaseModel):
         verbose_name_plural = verbose_name
 
 
-class Addr(models.Model):
+class Addr(BaseModel):
     """收获地址模型"""
     user = models.ForeignKey(User, verbose_name="用户", on_delete=models.CASCADE)
     name = models.CharField(verbose_name="收货人", max_length=20)
@@ -33,7 +33,7 @@ class Addr(models.Model):
         verbose_name_plural = verbose_name
 
 
-class Area(models.Model):
+class Area(BaseModel):
     """省市县区域表"""
     pid = models.IntegerField(verbose_name="父级id")
     name = models.CharField(verbose_name="区域名称", max_length=20)
@@ -44,14 +44,3 @@ class Area(models.Model):
         verbose_name = "区域表"
         verbose_name_plural = verbose_name
 
-
-class VerifCode(models.Model):
-    """验证码"""
-    code = models.CharField(verbose_name="验证码", max_length=20)
-    mobile = models.CharField(verbose_name="手机号", max_length=11)
-    add_time = models.DateTimeField(verbose_name="添加时间", auto_now_add=True)
-
-    class Meta:
-        db_table = "tb_verifcode"
-        verbose_name = "验证码表"
-        verbose_name_plural = verbose_name

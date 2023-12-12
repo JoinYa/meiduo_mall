@@ -9,6 +9,10 @@ from .serializers import UserSerializers, AddrSerializers
 from utils.pagenumberpagination import LargeResultsSetPagination
 from rest_framework_simplejwt.views import TokenObtainPairView
 from common.permissions import BasePermission
+from rest_framework.throttling import AnonRateThrottle, UserRateThrottle
+import random
+import string
+import redis
 from rest_framework.decorators import action
 
 
@@ -116,3 +120,45 @@ class AddrViewSet(BaseModelViewSet):
             # 如果已存在默认地址，先取消其默认状态
             self.queryset.filter(is_default=True).update(is_default=False)
         return super(AddrViewSet, self).update(request, *args, **kwargs)
+
+
+class SendVerifCodeViewSet(APIView):
+    """生成验证码"""
+    throttle_classes = [AnonRateThrottle, UserRateThrottle]
+
+    def get_random_code(self):
+        """生成随机验证码"""
+        return ''.join(random.choice(string.digits) for i in range(6))
+
+    def post(self, request):
+
+        mobile = request.data.get("mobile")
+        code = self.get_random_code()
+
+        try:
+            rs = redis.Redis(host='localhost', port=6379, db=2)
+        except Exception as e:
+            return Response({"message": "数据库连接失败！"}, status=status.HTTP_404_NOT_FOUND)
+
+        result = rs.set(mobile, code, 60 * 5)
+        if result:
+            return Response({"message": "发送成功！"}, status=status.HTTP_200_OK)
+
+
+class CheckSendVerifCodeViewSet(APIView):
+    """验证验证码"""
+
+    def post(self, request):
+        mobile = request.data.get("mobile")
+        code = request.data.get("code")
+        try:
+            rs = redis.Redis(host='localhost', port=6379, db=2)
+        except Exception as e:
+            return Response({"message": "数据库连接失败！"}, status=status.HTTP_404_NOT_FOUND)
+
+        returns = rs.get(mobile)
+        if not returns:
+            return Response({"message": "验证码已过期！"}, status=status.HTTP_404_NOT_FOUND)
+        if returns.decode() != code:
+            return Response({"message": "无效验证码！"}, status=status.HTTP_404_NOT_FOUND)
+        return Response({"message": "验证通过！"}, status=status.HTTP_200_OK)
