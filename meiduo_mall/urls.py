@@ -20,6 +20,7 @@ from .views import FileViewSet
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', include('apps.users.urls')),
+    path('users/', include('apps.users.urls')),
+    path('goods/', include('apps.goods.urls')),
     re_path(r'media/image/(.+?)/', FileViewSet.as_view())
 ]

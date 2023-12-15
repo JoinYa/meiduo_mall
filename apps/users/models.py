@@ -5,6 +5,7 @@ from common.models import BaseModel
 
 # Create your models here.
 class User(AbstractUser, BaseModel):
+    """用户模型"""
     email = models.EmailField(verbose_name="邮箱", blank=True, unique=True)
     mobile = models.CharField(verbose_name="手机号", max_length=11, unique=True)
     avatar = models.ImageField(verbose_name="头像", blank=True, null=True, upload_to="image",
@@ -32,9 +33,12 @@ class Addr(BaseModel):
         verbose_name = "收获地址表"
         verbose_name_plural = verbose_name
 
+    def __str__(self):
+        return self.user
+
 
 class Area(BaseModel):
-    """省市县区域表"""
+    """省市县区域模型"""
     pid = models.IntegerField(verbose_name="父级id")
     name = models.CharField(verbose_name="区域名称", max_length=20)
     level = models.CharField(verbose_name="区域等级", max_length=20)

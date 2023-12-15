@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'django_filters',
     'apps.users',
+    'apps.goods',
     # CORS
     'corsheaders'
 ]
@@ -219,13 +220,17 @@ REST_FRAMEWORK = {
     ],
     # 默认的权限列表： 只有登录用户才可以访问
     'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.IsAuthenticated',
+        # 'rest_framework.permissions.IsAuthenticated',
+        'rest_framework.permissions.AllowAny',
     ],
+    # 在全局DEFAULT_FILTER_BACKENDS指定使用的过滤引擎类（SearchFilter为搜索引擎类）
+    'DEFAULT_FILTER_BACKENDS': ['rest_framework.filters.SearchFilter',
+                                'rest_framework.filters.OrderingFilter'],
+    # 可以在全局使用SEARCH_PARAM修改前端过滤查询字符串参数名称（默认为search）
+    'SEARCH_PARAM': 'search',
     # 分页
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     'PAGE_SIZE': 10,  # 每页数目
-    # 指定过滤器
-    'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend'],
     #  配置限流
     'DEFAULT_THROTTLE_RATES': {
         'anon': '1/minute',

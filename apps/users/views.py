@@ -1,3 +1,5 @@
+import os
+from django.http import FileResponse
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -5,6 +7,8 @@ from rest_framework_simplejwt.exceptions import TokenError, InvalidToken
 from apps.users.models import User, Addr
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.views import APIView
+
+from meiduo_mall.settings import MEDIA_ROOT
 from .serializers import UserSerializers, AddrSerializers
 from utils.pagenumberpagination import LargeResultsSetPagination
 from rest_framework_simplejwt.views import TokenObtainPairView
@@ -30,11 +34,11 @@ class UserViewSet(BaseModelViewSet):
     """用户视图"""
     queryset = User.objects.all()
     serializer_class = UserSerializers
+    search_fields = ['username']
 
     def list(self, request, *args, **kwargs):
         queryset = self.filter_queryset(self.get_queryset())
-        if not request.user.is_superuser:
-            queryset = queryset.filter(username=request.user)
+        queryset = queryset.filter(username=request.user)
         page = self.paginate_queryset(queryset)
         if page is not None:
             serializer = self.get_serializer(page, many=True)
@@ -80,7 +84,7 @@ class LoginViewSet(TokenObtainPairView):
     """登录"""
 
     def post(self, request, *args, **kwargs):
-        serializer = self.get_serializer(data=request.data)
+        serializer = self.get_serializer(data=request.data, context={"request": request})
 
         try:
             serializer.is_valid(raise_exception=True)
@@ -91,6 +95,7 @@ class LoginViewSet(TokenObtainPairView):
         result["mobile"] = serializer.user.mobile
         result["email"] = serializer.user.email
         result["username"] = serializer.user.username
+        result["avatar"] = "media\image\logo5_922SRQ9.png"
         result["token"] = result.pop("access")
         result["code"] = 0
         result["errmsg"] = "ok"
@@ -105,8 +110,7 @@ class AddrViewSet(BaseModelViewSet):
 
     def list(self, request, *args, **kwargs):
         queryset = self.filter_queryset(self.get_queryset())
-        if not request.user.is_superuser:
-            queryset = queryset.filter(user=request.user)
+        queryset = queryset.filter(user=request.user)
         page = self.paginate_queryset(queryset)
         if page is not None:
             serializer = self.get_serializer(page, many=True)
